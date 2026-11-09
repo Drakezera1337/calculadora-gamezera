@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14111f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Calc Gamezera">
+  <title>Calculadora Gamezera</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">gamezera<span>calc</span></div>
+    <nav class="tabs" role="tablist">
+      <button data-tab="parcelas" class="on">Parcelas</button>
+      <button data-tab="troca">Troca</button>
+      <button data-tab="taxas">Taxas</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- PARCELAS -->
+    <section id="tab-parcelas" class="tab">
+      <label class="big-input">
+        <span>Valor à vista</span>
+        <div class="money"><b>R$</b><input id="avista" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
+      </label>
+
+      <div class="seg" id="bandeira">
+        <button data-b="visa" class="on">Visa / Master</button>
+        <button data-b="elo">Elo / Amex</button>
+      </div>
+
+      <div class="card list" id="tabela"></div>
+      <p class="hint">Valores já com a taxa repassada: você recebe o valor à vista cheio. <span class="so-pc">Clique</span><span class="so-cel">Toque</span> numa linha para copiar.</p>
+    </section>
+
+    <!-- TROCA -->
+    <section id="tab-troca" class="tab" hidden>
+      <div class="card form">
+        <h2>Item que sai (meu)</h2>
+        <label class="field"><span>Quanto me custou</span>
+          <div class="money"><b>R$</b><input id="t-custo" inputmode="decimal" placeholder="0,00"></div></label>
+      </div>
+
+      <div class="card form">
+        <h2>Volta do cliente</h2>
+        <label class="field"><span>Cliente volta</span>
+          <div class="money"><b>R$</b><input id="t-volta" inputmode="decimal" placeholder="0,00"></div></label>
+        <label class="field"><span>Forma de pagamento da volta</span>
+          <select id="t-forma"></select></label>
+        <label class="check"><input type="checkbox" id="t-repassa" checked> Repassar a taxa do cartão para o cliente</label>
+        <div class="pill" id="t-cartao" hidden></div>
+      </div>
+
+      <div class="card form">
+        <h2>Item que entra (do cliente)</h2>
+        <label class="field"><span>Vou vender por</span>
+          <div class="money"><b>R$</b><input id="t-revenda" inputmode="decimal" placeholder="0,00"></div></label>
+        <label class="field"><span>Gastos extras (limpeza, peça, frete…) <i>opcional</i></span>
+          <div class="money"><b>R$</b><input id="t-extra" inputmode="decimal" placeholder="0,00"></div></label>
+      </div>
+
+      <div class="card result" id="t-result"></div>
+      <button class="ghost" id="t-limpar">Limpar troca</button>
+    </section>
+
+    <!-- TAXAS -->
+    <section id="tab-taxas" class="tab" hidden>
+      <p class="hint top">Taxas InfinitePay da faixa de entrada (até R$ 20 mil/mês), recebimento em 1 dia útil.
+        Se no seu app estiver diferente, é só editar — fica salvo <span class="so-pc">neste PC</span><span class="so-cel">neste celular</span>.</p>
+      <div class="seg" id="bandeira-taxas">
+        <button data-b="visa" class="on">Visa / Master</button>
+        <button data-b="elo">Elo / Amex</button>
+      </div>
+      <div class="card form" id="editor"></div>
+      <button class="ghost" id="restaurar">Restaurar taxas padrão</button>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+  <script src="app.js?v=1"></script>
+</body>
+</html>

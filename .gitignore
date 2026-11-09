@@ -1,0 +1,8 @@
+# Só o app do celular vai para o GitHub Pages; o programa do PC fica só aqui.
+.vendor/
+.dados/
+erro.log
+calculadora.pyw
+icon.ico
+__pycache__/
+.claude/
