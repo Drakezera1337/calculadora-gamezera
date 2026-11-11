@@ -12,7 +12,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=1">
+  <link rel="stylesheet" href="styles.css?v=2">
 </head>
 <body>
   <header class="topbar">
@@ -38,7 +38,11 @@
       </div>
 
       <div class="card list" id="tabela"></div>
-      <p class="hint">Valores já com a taxa repassada: você recebe o valor à vista cheio. <span class="so-pc">Clique</span><span class="so-cel">Toque</span> numa linha para copiar.</p>
+      <button class="copiar-todas" id="copiar-todas" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1Zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H8V7h11v14Z"/></svg>
+        Copiar todas
+      </button>
+      <p class="hint">Valores já com a taxa repassada: você recebe o valor à vista cheio.</p>
     </section>
 
     <!-- TROCA -->
@@ -85,6 +89,6 @@
   </main>
 
   <div id="toast" class="toast" hidden></div>
-  <script src="app.js?v=1"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

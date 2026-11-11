@@ -49,9 +49,20 @@ function toast(msg) {
   el.textContent = msg; el.hidden = false;
   clearTimeout(toast.t); toast.t = setTimeout(() => (el.hidden = true), 1600);
 }
-function copiar(txt) {
-  (navigator.clipboard?.writeText(txt) || Promise.reject()).then(() => toast('Copiado!'), () => toast(txt));
+function copiar(txt, msg = 'Copiado!') {
+  const reserva = () => {
+    const ta = document.createElement('textarea');
+    ta.value = txt; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch {}
+    ta.remove();
+    toast(ok ? msg : 'Não consegui copiar');
+  };
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(txt).then(() => toast(msg), reserva);
+  else reserva();
 }
+
+const ICONE_COPIAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1Zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H8V7h11v14Z"/></svg>';
 
 // ---------- Abas ----------
 function abrirAba(aba) {
@@ -70,27 +81,32 @@ function seg(el, onChange) {
 }
 
 // ---------- Parcelas ----------
+// Texto copiado de cada linha: "Valor à vista : R$ x", "Crédito 2x : 2x de R$ y (total R$ z)"
 function renderTabela() {
   const v = num($('#avista').value);
   const tx = estado.taxas[estado.bandeira];
   const el = $('#tabela');
-  if (v <= 0) { el.innerHTML = '<div class="empty">Digite o valor à vista para ver as parcelas.</div>'; return; }
+  const btnTodas = $('#copiar-todas');
+  if (v <= 0) { el.innerHTML = '<div class="empty">Digite o valor à vista para ver as parcelas.</div>'; btnTodas.hidden = true; return; }
   const linhas = [];
-  linhas.push({ n: 'Pix', sub: 'sem taxa', parcela: v, total: v, t: 0, pix: true, copia: `Pix: ${brl(v)}` });
+  linhas.push({ n: 'Pix', sub: 'à vista', parcela: v, total: v, pix: true, todas: true, copia: `Valor à vista : ${brl(v)}` });
   const d = cobrar(v, tx[0], 1);
-  linhas.push({ n: 'Déb', sub: pct(tx[0]), parcela: d.parcela, total: d.total, t: tx[0], copia: `Débito: ${brl(d.total)}` });
+  linhas.push({ n: 'Déb', sub: pct(tx[0]), parcela: d.parcela, total: d.total, copia: `Débito : ${brl(d.total)}` });
   for (let n = 1; n <= 12; n++) {
     const c = cobrar(v, tx[n], n);
-    linhas.push({ n: n + 'x', sub: pct(tx[n]), nx: n, parcela: c.parcela, total: c.total, t: tx[n],
-      copia: n === 1 ? `Crédito à vista: ${brl(c.total)}` : `${n}x de ${brl(c.parcela)} (total ${brl(c.total)})` });
+    linhas.push({ n: n + 'x', sub: pct(tx[n]), nx: n, parcela: c.parcela, total: c.total, todas: true,
+      copia: n === 1 ? `Crédito 1x : ${brl(c.total)}` : `Crédito ${n}x : ${n}x de ${brl(c.parcela)} (total ${brl(c.total)})` });
   }
   el.innerHTML = linhas.map((l, i) => `
-    <div class="row${l.pix ? ' pix' : ''}" data-i="${i}">
+    <div class="row${l.pix ? ' pix' : ''}">
       <div class="n">${l.n}<small>${l.sub}</small></div>
       <div class="parc">${l.nx > 1 ? `<small>${l.nx}x </small>` : ''}${brl(l.parcela)}</div>
       <div class="tot">total<b>${brl(l.total)}</b></div>
+      <button class="copy" data-i="${i}" title="Copiar" aria-label="Copiar ${l.n}">${ICONE_COPIAR}</button>
     </div>`).join('');
-  el.querySelectorAll('.row').forEach((r) => r.addEventListener('click', () => copiar(linhas[r.dataset.i].copia)));
+  el.querySelectorAll('.copy').forEach((b) => b.addEventListener('click', () => copiar(linhas[b.dataset.i].copia)));
+  btnTodas.hidden = false;
+  btnTodas.onclick = () => copiar(linhas.filter((l) => l.todas).map((l) => l.copia).join('\n'), 'Todas as parcelas copiadas!');
 }
 $('#avista').addEventListener('input', renderTabela);
 seg($('#bandeira'), () => { renderTabela(); renderEditor(); renderTroca(); });
