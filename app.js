@@ -81,7 +81,7 @@ function seg(el, onChange) {
 }
 
 // ---------- Parcelas ----------
-// Texto copiado de cada linha: "Valor à vista : R$ x", "Crédito 2x : 2x de R$ y (total R$ z)"
+// Texto copiado de cada linha: "Valor à vista : R$ x", "1x de R$ y", "2x de R$ y (total R$ z)"
 function renderTabela() {
   const v = num($('#avista').value);
   const tx = estado.taxas[estado.bandeira];
@@ -95,7 +95,7 @@ function renderTabela() {
   for (let n = 1; n <= 12; n++) {
     const c = cobrar(v, tx[n], n);
     linhas.push({ n: n + 'x', sub: pct(tx[n]), nx: n, parcela: c.parcela, total: c.total, todas: true,
-      copia: n === 1 ? `Crédito 1x : ${brl(c.total)}` : `Crédito ${n}x : ${n}x de ${brl(c.parcela)} (total ${brl(c.total)})` });
+      copia: n === 1 ? `1x de ${brl(c.total)}` : `${n}x de ${brl(c.parcela)} (total ${brl(c.total)})` });
   }
   el.innerHTML = linhas.map((l, i) => `
     <div class="row${l.pix ? ' pix' : ''}">
