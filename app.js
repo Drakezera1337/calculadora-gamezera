@@ -5,6 +5,9 @@
 const TAXAS_PADRAO = {
   visa: [1.37, 3.15, 5.39, 6.12, 6.85, 7.57, 8.28, 8.99, 9.69, 10.38, 11.06, 11.74, 12.40],
   elo:  [2.58, 4.91, 6.47, 7.20, 7.92, 8.63, 9.33, 10.03, 10.72, 11.41, 12.08, 12.75, 13.41],
+  // Link de pagamento (tabela de entrada, "a partir de 4,20%"), mesma taxa para todas as bandeiras.
+  // O link não aceita débito: o índice 0 fica sem uso.
+  link: [0, 4.20, 6.09, 7.01, 7.91, 8.80, 9.67, 12.59, 13.42, 14.25, 15.06, 15.87, 16.66],
 };
 const CHAVE = 'gamezera-calc-v1';
 
@@ -22,8 +25,9 @@ function lerEstado() {
 function salvar() {
   try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch {}
 }
-const estado = Object.assign({ taxas: structuredClone(TAXAS_PADRAO), bandeira: 'visa', aba: 'parcelas', mostrarTotal: true }, lerEstado());
+const estado = Object.assign({ taxas: structuredClone(TAXAS_PADRAO), bandeira: 'visa', modo: 'maq', editando: 'visa', aba: 'parcelas', mostrarTotal: true }, lerEstado());
 if (!estado.taxas?.visa || estado.taxas.visa.length !== 13) estado.taxas = structuredClone(TAXAS_PADRAO);
+if (!estado.taxas.link || estado.taxas.link.length !== 13) estado.taxas.link = [...TAXAS_PADRAO.link];
 
 // "1.234,56", "1234.56", "1234,5" -> número
 function num(txt) {
@@ -72,10 +76,15 @@ function abrirAba(aba) {
 }
 document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => abrirAba(b.dataset.tab)));
 
-function seg(el, onChange) {
+// Seletor de botões (data-v) ligado a um campo do estado.
+function marcarSeg(el, campo) {
+  el.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x.dataset.v === estado[campo]));
+}
+function seg(el, campo, onChange) {
+  marcarSeg(el, campo);
   el.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
-    estado.bandeira = b.dataset.b; salvar();
-    document.querySelectorAll('.seg').forEach((s) => s.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x.dataset.b === estado.bandeira)));
+    estado[campo] = b.dataset.v; salvar();
+    marcarSeg(el, campo);
     onChange();
   }));
 }
@@ -84,7 +93,10 @@ function seg(el, onChange) {
 // Texto copiado de cada linha: "Valor à vista : R$ x", "1x de R$ y", "2x de R$ y" + " (total R$ z)" se o toggle estiver ligado
 function renderTabela() {
   const v = num($('#avista').value);
-  const tx = estado.taxas[estado.bandeira];
+  const link = estado.modo === 'link';
+  const tx = link ? estado.taxas.link : estado.taxas[estado.bandeira];
+  $('#bandeira').hidden = link;
+  $('#aviso-link').hidden = !link;
   const el = $('#tabela');
   const btnTodas = $('#copiar-todas');
   const opcTotal = $('#opc-total');
@@ -92,7 +104,7 @@ function renderTabela() {
   const linhas = [];
   linhas.push({ n: 'Pix', sub: 'à vista', parcela: v, total: v, pix: true, todas: true, copia: `Valor à vista : ${brl(v)}` });
   const d = cobrar(v, tx[0], 1);
-  linhas.push({ n: 'Déb', sub: pct(tx[0]), parcela: d.parcela, total: d.total, copia: `Débito : ${brl(d.total)}` });
+  if (!link) linhas.push({ n: 'Déb', sub: pct(tx[0]), parcela: d.parcela, total: d.total, copia: `Débito : ${brl(d.total)}` });
   for (let n = 1; n <= 12; n++) {
     const c = cobrar(v, tx[n], n);
     linhas.push({ n: n + 'x', sub: pct(tx[n]), nx: n, parcela: c.parcela, total: c.total, todas: true,
@@ -112,7 +124,8 @@ function renderTabela() {
 $('#avista').addEventListener('input', renderTabela);
 $('#mostrar-total').checked = estado.mostrarTotal;
 $('#mostrar-total').addEventListener('change', (e) => { estado.mostrarTotal = e.target.checked; salvar(); renderTabela(); });
-seg($('#bandeira'), () => { renderTabela(); renderEditor(); renderTroca(); });
+seg($('#modo'), 'modo', renderTabela);
+seg($('#bandeira'), 'bandeira', () => { renderTabela(); renderTroca(); });
 
 // ---------- Troca ----------
 const formas = [['pix', 'Pix / dinheiro'], ['deb', 'Débito']];
@@ -192,18 +205,18 @@ $('#t-limpar').addEventListener('click', () => {
 
 // ---------- Editor de taxas ----------
 function renderEditor() {
-  const tx = estado.taxas[estado.bandeira];
+  const tx = estado.taxas[estado.editando];
   const nomes = ['Débito', 'Crédito à vista'];
   for (let n = 2; n <= 12; n++) nomes.push(`Crédito ${n}x`);
-  $('#editor').innerHTML = nomes.map((nome, i) => `
+  $('#editor').innerHTML = nomes.map((nome, i) => (estado.editando === 'link' && i === 0) ? '' : `
     <div class="taxa-row"><label for="tx${i}">${nome}</label>
       <div class="pct"><input id="tx${i}" data-i="${i}" inputmode="decimal" value="${String(tx[i]).replace('.', ',')}"><span>%</span></div></div>`).join('');
   $('#editor').querySelectorAll('input').forEach((inp) => inp.addEventListener('input', () => {
     const v = num(inp.value);
-    if (v >= 0 && v < 100) { estado.taxas[estado.bandeira][+inp.dataset.i] = v; salvar(); renderTabela(); renderTroca(); }
+    if (v >= 0 && v < 100) { estado.taxas[estado.editando][+inp.dataset.i] = v; salvar(); renderTabela(); renderTroca(); }
   }));
 }
-seg($('#bandeira-taxas'), () => { renderTabela(); renderEditor(); renderTroca(); });
+seg($('#bandeira-taxas'), 'editando', renderEditor);
 $('#restaurar').addEventListener('click', () => {
   if (!confirm('Voltar todas as taxas para o padrão InfinitePay (até R$ 20 mil)?')) return;
   estado.taxas = structuredClone(TAXAS_PADRAO); salvar();
@@ -211,7 +224,6 @@ $('#restaurar').addEventListener('click', () => {
 });
 
 // ---------- Início ----------
-document.querySelectorAll('.seg').forEach((s) => s.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x.dataset.b === estado.bandeira)));
 abrirAba(estado.aba || 'parcelas');
 renderTabela(); renderTroca(); renderEditor();
 

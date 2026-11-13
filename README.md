@@ -12,7 +12,10 @@ Fórmula do parcelamento: `total = à vista ÷ (1 − taxa)`, com a parcela arre
 ## Taxas
 
 Padrão: InfinitePay, faixa "Até R$ 20 mil/mês", recebimento em 1 dia útil (infinitepay.io/taxas, nov/2026).
-Dá para editar na aba **Taxas** (Visa/Master e Elo/Amex separados); fica salvo no PC (pasta `.dados`).
+- **Maquininha:** Visa/Master e Elo/Amex separados (débito + crédito 1x a 12x).
+- **Link de pagamento:** tabela de entrada ("a partir de 4,20%"), igual para todas as bandeiras, sem débito.
+  Na aba Parcelas, escolha **Maquininha** ou **Link de pagamento**.
+Dá para editar na aba **Taxas** (Visa/Master, Elo/Amex e Link); fica salvo no PC (pasta `.dados`).
 
 ## Abrir
 

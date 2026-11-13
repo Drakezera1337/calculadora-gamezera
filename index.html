@@ -12,7 +12,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <header class="topbar">
@@ -32,10 +32,16 @@
         <div class="money"><b>R$</b><input id="avista" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
       </label>
 
-      <div class="seg" id="bandeira">
-        <button data-b="visa" class="on">Visa / Master</button>
-        <button data-b="elo">Elo / Amex</button>
+      <div class="seg modo" id="modo">
+        <button data-v="maq" class="on">Maquininha</button>
+        <button data-v="link">Link de pagamento</button>
       </div>
+
+      <div class="seg" id="bandeira">
+        <button data-v="visa" class="on">Visa / Master</button>
+        <button data-v="elo">Elo / Amex</button>
+      </div>
+      <p class="hint" id="aviso-link" hidden>Link de pagamento: mesma taxa para todas as bandeiras e sem débito.</p>
 
       <div class="card list" id="tabela"></div>
       <label class="switch" id="opc-total" hidden>
@@ -81,11 +87,12 @@
 
     <!-- TAXAS -->
     <section id="tab-taxas" class="tab" hidden>
-      <p class="hint top">Taxas InfinitePay da faixa de entrada (até R$ 20 mil/mês), recebimento em 1 dia útil.
+      <p class="hint top">Taxas InfinitePay da faixa de entrada (até R$ 20 mil/mês), recebimento em 1 dia útil: maquininha por bandeira e link de pagamento.
         Se no seu app estiver diferente, é só editar — fica salvo <span class="so-pc">neste PC</span><span class="so-cel">neste celular</span>.</p>
       <div class="seg" id="bandeira-taxas">
-        <button data-b="visa" class="on">Visa / Master</button>
-        <button data-b="elo">Elo / Amex</button>
+        <button data-v="visa" class="on">Visa / Master</button>
+        <button data-v="elo">Elo / Amex</button>
+        <button data-v="link">Link</button>
       </div>
       <div class="card form" id="editor"></div>
       <button class="ghost" id="restaurar">Restaurar taxas padrão</button>
@@ -93,6 +100,6 @@
   </main>
 
   <div id="toast" class="toast" hidden></div>
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>

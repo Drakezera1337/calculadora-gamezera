@@ -148,3 +148,8 @@ html.cel .so-pc { display: none; }
 .switch input:checked + i { background: var(--accent2); }
 .switch input:checked + i::after { transform: translateX(18px); }
 .switch input:focus-visible + i { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Seletor Maquininha / Link de pagamento */
+.seg.modo { margin-bottom: 0; }
+.seg.modo button.on { background: var(--accent2); color: #0f0d17; }
+#aviso-link { margin: 10px 4px 12px; }
