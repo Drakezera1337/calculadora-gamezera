@@ -22,7 +22,7 @@ function lerEstado() {
 function salvar() {
   try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch {}
 }
-const estado = Object.assign({ taxas: structuredClone(TAXAS_PADRAO), bandeira: 'visa', aba: 'parcelas' }, lerEstado());
+const estado = Object.assign({ taxas: structuredClone(TAXAS_PADRAO), bandeira: 'visa', aba: 'parcelas', mostrarTotal: true }, lerEstado());
 if (!estado.taxas?.visa || estado.taxas.visa.length !== 13) estado.taxas = structuredClone(TAXAS_PADRAO);
 
 // "1.234,56", "1234.56", "1234,5" -> número
@@ -81,13 +81,14 @@ function seg(el, onChange) {
 }
 
 // ---------- Parcelas ----------
-// Texto copiado de cada linha: "Valor à vista : R$ x", "1x de R$ y", "2x de R$ y (total R$ z)"
+// Texto copiado de cada linha: "Valor à vista : R$ x", "1x de R$ y", "2x de R$ y" + " (total R$ z)" se o toggle estiver ligado
 function renderTabela() {
   const v = num($('#avista').value);
   const tx = estado.taxas[estado.bandeira];
   const el = $('#tabela');
   const btnTodas = $('#copiar-todas');
-  if (v <= 0) { el.innerHTML = '<div class="empty">Digite o valor à vista para ver as parcelas.</div>'; btnTodas.hidden = true; return; }
+  const opcTotal = $('#opc-total');
+  if (v <= 0) { el.innerHTML = '<div class="empty">Digite o valor à vista para ver as parcelas.</div>'; btnTodas.hidden = opcTotal.hidden = true; return; }
   const linhas = [];
   linhas.push({ n: 'Pix', sub: 'à vista', parcela: v, total: v, pix: true, todas: true, copia: `Valor à vista : ${brl(v)}` });
   const d = cobrar(v, tx[0], 1);
@@ -95,7 +96,7 @@ function renderTabela() {
   for (let n = 1; n <= 12; n++) {
     const c = cobrar(v, tx[n], n);
     linhas.push({ n: n + 'x', sub: pct(tx[n]), nx: n, parcela: c.parcela, total: c.total, todas: true,
-      copia: n === 1 ? `1x de ${brl(c.total)}` : `${n}x de ${brl(c.parcela)} (total ${brl(c.total)})` });
+      copia: n === 1 ? `1x de ${brl(c.total)}` : `${n}x de ${brl(c.parcela)}${estado.mostrarTotal ? ` (total ${brl(c.total)})` : ''}` });
   }
   el.innerHTML = linhas.map((l, i) => `
     <div class="row${l.pix ? ' pix' : ''}">
@@ -105,10 +106,12 @@ function renderTabela() {
       <button class="copy" data-i="${i}" title="Copiar" aria-label="Copiar ${l.n}">${ICONE_COPIAR}</button>
     </div>`).join('');
   el.querySelectorAll('.copy').forEach((b) => b.addEventListener('click', () => copiar(linhas[b.dataset.i].copia)));
-  btnTodas.hidden = false;
+  btnTodas.hidden = opcTotal.hidden = false;
   btnTodas.onclick = () => copiar(linhas.filter((l) => l.todas).map((l) => l.copia).join('\n'), 'Todas as parcelas copiadas!');
 }
 $('#avista').addEventListener('input', renderTabela);
+$('#mostrar-total').checked = estado.mostrarTotal;
+$('#mostrar-total').addEventListener('change', (e) => { estado.mostrarTotal = e.target.checked; salvar(); renderTabela(); });
 seg($('#bandeira'), () => { renderTabela(); renderEditor(); renderTroca(); });
 
 // ---------- Troca ----------

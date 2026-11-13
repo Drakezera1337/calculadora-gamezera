@@ -1,5 +1,5 @@
 // Calculadora Gamezera (celular): guarda tudo no aparelho para abrir na hora e funcionar sem internet.
-const CACHE = 'gamezera-calc-v4';
+const CACHE = 'gamezera-calc-v5';
 const ASSETS = ['./', 'index.html', 'styles.css', 'app.js', 'icon.svg', 'icon-192.png', 'icon-512.png', 'manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {
